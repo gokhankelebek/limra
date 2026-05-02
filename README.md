@@ -2,7 +2,7 @@
 
 A warm, refined "opening soon" landing page for **Limra Mediterranean Restaurant & Café**, opening July 2026 in Holly Springs, NC.
 
-> An elevated Mediterranean bistro by chefs Mehmetcan & Elif — döner and gyro from the spit, a fresh daily buffet, pastries and baklava, and a proper espresso bar.
+> An elevated Mediterranean bistro by chefs Mehmetcan & Elif — döner and gyro from the spit, a fresh daily buffet, pastries and baklava, and a proper espresso counter.
 
 ## What's inside
 
