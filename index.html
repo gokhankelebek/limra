@@ -7,6 +7,9 @@
 <meta name="description" content="An elevated Mediterranean bistro opening July 2026 in Holly Springs. Döner and gyro, a fresh daily buffet hot and cold, pastries and baklava, and a proper espresso counter. By chefs Can and Elif." />
 <meta name="theme-color" content="#1F4A2E" />
 
+<!-- Above-the-fold emblem: preload so it's in flight while CSS/fonts parse -->
+<link rel="preload" as="image" href="limra-emblem.webp" type="image/webp" fetchpriority="high" />
+
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTAiIGZpbGw9IiNGMkU1QzkiLz48dGV4dCB4PSIzMiIgeT0iNDYiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLHNlcmlmIiBmb250LXNpemU9IjQyIiBmb250LXdlaWdodD0iMzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMUY0QTJFIj5MPC90ZXh0Pjwvc3ZnPg==" />
 <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTAiIGZpbGw9IiNGMkU1QzkiLz48dGV4dCB4PSIzMiIgeT0iNDYiIGZvbnQtZmFtaWx5PSJHZW9yZ2lhLHNlcmlmIiBmb250LXNpemU9IjQyIiBmb250LXdlaWdodD0iMzAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMUY0QTJFIj5MPC90ZXh0Pjwvc3ZnPg==" />
 
@@ -42,7 +45,6 @@
 
   *,*::before,*::after{ box-sizing:border-box; }
   html,body{ margin:0; padding:0; }
-  html{ scroll-behavior:smooth; }
 
   body{
     background: var(--cream);
@@ -269,6 +271,24 @@
   .emblem-pip--s{ bottom: -36px; left: 50%;   --pip-translate: translate(-50%,  50%); animation-delay: 2.25s; }
   .emblem-pip--w{ left: -36px;   top: 50%;    --pip-translate: translate(-50%, -50%); animation-delay: 2.35s; }
   .emblem-wrap:hover .emblem-pip{ background: var(--green); }
+
+  /* Hold the entire emblem choreography until the image is decoded.
+     A small JS shim adds .emblem-ready to <html> via img.decode(), so
+     the entrance never plays against an empty disc on a cold load. */
+  .emblem-wrap,
+  .emblem-disc::after,
+  .emblem-wrap::before,
+  .emblem-wrap::after,
+  .emblem-pip{
+    animation-play-state: paused;
+  }
+  .emblem-ready .emblem-wrap,
+  .emblem-ready .emblem-disc::after,
+  .emblem-ready .emblem-wrap::before,
+  .emblem-ready .emblem-wrap::after,
+  .emblem-ready .emblem-pip{
+    animation-play-state: running;
+  }
 
   .headline{
     font-family: var(--serif-display);
@@ -742,7 +762,11 @@
 
     <div class="emblem-wrap">
       <div class="emblem-disc">
-        <img src="limra-emblem-brown-removed.png" alt="Limra Mediterranean Restaurant emblem" />
+        <img src="limra-emblem.webp"
+             alt="Limra Mediterranean Restaurant emblem"
+             width="800" height="800"
+             fetchpriority="high"
+             decoding="async" />
       </div>
       <span class="emblem-pip emblem-pip--n" aria-hidden="true"></span>
       <span class="emblem-pip emblem-pip--e" aria-hidden="true"></span>
@@ -938,6 +962,24 @@
 <div class="border-strip" aria-hidden="true" style="margin-top:0;"></div>
 
 <script>
+  /* Emblem entrance gate — flips .emblem-ready on <html> as soon as the
+     hero image is decoded, so the choreography starts on a real pixel,
+     not an empty disc. 3s failsafe in case decode never resolves. */
+  (function(){
+    var root = document.documentElement;
+    var img  = document.querySelector('.emblem-disc img');
+    function ready(){ root.classList.add('emblem-ready'); }
+    if (!img) { ready(); return; }
+    if (img.complete && img.naturalWidth) { ready(); return; }
+    if (img.decode) {
+      img.decode().then(ready, ready);
+    } else {
+      img.addEventListener('load',  ready, { once: true });
+      img.addEventListener('error', ready, { once: true });
+    }
+    setTimeout(ready, 3000);
+  })();
+
   // Year
   document.getElementById('year').textContent = new Date().getFullYear();
 
